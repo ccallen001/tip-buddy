@@ -20,12 +20,7 @@ function App() {
   }, [pretaxAmount, percentAmount]);
 
   return (
-    <Box
-      className="App"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-    >
+    <div className="App">
       <Typography variant="h1" pb={4} textAlign="center">
         🤑
         <br />
@@ -80,7 +75,7 @@ function App() {
       <Typography align="right">
         <strong>Total:</strong> {totalAmount}
       </Typography>
-    </Box>
+    </div>
   );
 }
 
