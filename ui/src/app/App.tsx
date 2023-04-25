@@ -1,74 +1,64 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Slider } from '@mui/material';
+import { Typography, Box } from '@mui/material';
+import PretaxTextField from '../components/PretaxTextField';
+import PosttaxTextField from '../components/PosttaxTextField';
+import PercentSlider from '../components/PercentSlider';
+import moneyWoman from '../assets/money-woman.png';
 import './App.scss';
+
+export type ErrorObject = {
+  field: string;
+  msg: string;
+};
 
 function App() {
   const [pretaxAmount, setPretaxAmount] = useState('');
-  const [percentAmount, setPercentAmount] = useState(20);
+  const [posttaxAmount, setPosttaxAmount] = useState('');
+  const [percentTip, setPercentTip] = useState(20);
   const [tipAmount, setTipAmount] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<ErrorObject[]>([]);
 
   useEffect(() => {
     const pretax = parseFloat(pretaxAmount) || 0;
-    const percent = percentAmount / 100;
-    const total = Math.round(pretax * percent + pretax);
-    const tip = total - pretax;
+    const posttax = parseFloat(posttaxAmount) || 0;
+    const tip = pretax * (percentTip / 100);
+    const total = posttax + tip;
 
-    setTotalAmount(total.toFixed(2));
-    setTipAmount(tip.toFixed(2));
-  }, [pretaxAmount, percentAmount]);
+    const hasPretaxAndPosttax = !!pretax && !!posttax;
+
+    setTipAmount((hasPretaxAndPosttax ? tip : 0).toFixed(2));
+    setTotalAmount((hasPretaxAndPosttax ? total : 0).toFixed(2));
+  }, [pretaxAmount, posttaxAmount, percentTip]);
 
   return (
     <div className="App">
-      <Typography variant="h1" pb={4} textAlign="center">
-        🤑
-        <br />
-        Tip Buddy
+      <Typography variant="h2" pb={4} fontFamily="cursive" textAlign="center">
+        <strong>Tip Buddy</strong>
       </Typography>
 
-      <TextField
-        type="number"
-        label="Pretax Amount"
-        size="small"
-        color="info"
-        value={pretaxAmount}
-        onChange={(ev) => {
-          const value = ev.target.value;
-          if (value) setError('');
-          setPretaxAmount(value);
-        }}
-        error={!!error}
-        helperText={error}
-        sx={{ height: 64, width: '100%' }}
-      />
-      <Box pt={4} pb={4}>
-        <label>
-          <strong>Percent:</strong> {percentAmount}%
-        </label>
+      <img id="main-image" src={moneyWoman} />
 
-        <Slider
-          defaultValue={20}
-          max={30}
-          // step={5}
-          valueLabelDisplay="auto"
-          marks={[
-            {
-              label: '15%',
-              value: 15
-            },
-            {
-              label: '20%',
-              value: 20
-            }
-          ]}
-          value={percentAmount}
-          onChange={(ev) => {
-            if (!pretaxAmount) setError('Please provide pretax amount');
-            setPercentAmount(parseFloat((ev.target as HTMLInputElement).value));
+      <Box pb={3}>
+        <PretaxTextField
+          {...{ pretaxAmount, setPretaxAmount, errors, setErrors }}
+        />
+        <PosttaxTextField
+          {...{ posttaxAmount, setPosttaxAmount, errors, setErrors }}
+        />
+      </Box>
+
+      <Box pb={4}>
+        <PercentSlider
+          {...{
+            percentTip,
+            setPercentTip,
+            pretaxAmount,
+            posttaxAmount
           }}
         />
       </Box>
+
       <Typography align="right">
         <strong>Tip:</strong> {tipAmount}
       </Typography>
