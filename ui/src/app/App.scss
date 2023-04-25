@@ -11,7 +11,10 @@
     width: 16rem;
   }
 
-  .MuiTextField-root {
-    margin-bottom: 1rem;
+  input {
+    margin: 0.25rem 0 0.5rem;
+    padding: 0.5rem;
+    width: 100%;
+    outline-color: rgb(25, 118, 210);
   }
 }

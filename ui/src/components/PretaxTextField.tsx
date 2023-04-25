@@ -1,5 +1,4 @@
 import { TextField } from '@mui/material';
-import { ErrorObject } from '../app/App';
 
 interface PretaxTextFieldProps {
   pretaxAmount: string;
@@ -12,7 +11,7 @@ function PretaxTextField({
 }: PretaxTextFieldProps) {
   return (
     <TextField
-      className=""
+      className="PretaxTextField"
       type="number"
       label="Pretax Amount"
       size="small"

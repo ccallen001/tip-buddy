@@ -1,4 +1,3 @@
-import { ErrorObject } from '../app/App';
 import { Slider } from '@mui/material';
 
 interface PercentSliderProps {

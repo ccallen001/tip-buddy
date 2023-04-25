@@ -1,5 +1,4 @@
 import { TextField } from '@mui/material';
-import { ErrorObject } from '../app/App';
 
 interface PosttaxTextFieldProps {
   posttaxAmount: string;
@@ -12,7 +11,7 @@ function PosttaxTextField({
 }: PosttaxTextFieldProps) {
   return (
     <TextField
-      className=""
+      className="PosttaxTextField"
       type="number"
       label="Posttax Amount"
       size="small"
