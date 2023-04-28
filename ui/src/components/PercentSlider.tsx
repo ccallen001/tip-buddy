@@ -3,8 +3,8 @@ import { Slider } from '@mui/material';
 interface PercentSliderProps {
   percentTip: number;
   setPercentTip: (prev: number) => void;
-  pretaxAmount: string;
-  posttaxAmount: string;
+  beforeTaxAmount: string;
+  afterTaxAmount: string;
 }
 
 function PercentSlider({ percentTip, setPercentTip }: PercentSliderProps) {

@@ -1,35 +1,39 @@
 import { useRef, useState, useEffect } from 'react';
-import { Typography, Box } from '@mui/material';
-// import PretaxTextField from '../components/PretaxTextField';
-// import PosttaxTextField from '../components/PosttaxTextField';
+import { Typography, Box, Switch, FormControlLabel } from '@mui/material';
 import PercentSlider from '../components/PercentSlider';
 import moneyWoman from '../assets/money-woman.png';
 import './App.scss';
 
 function App() {
-  const [pretaxAmount, setPretaxAmount] = useState('');
-  const [posttaxAmount, setPosttaxAmount] = useState('');
+  const [beforeTaxAmount, setBeforeTaxAmount] = useState('');
+  const [afterTaxAmount, setAfterTaxAmount] = useState('');
+  const [shouldRoundTotal, setShouldRoundTotal] = useState(true);
   const [percentTip, setPercentTip] = useState(20);
-  const [tipAmount, setTipAmount] = useState('');
-  const [totalAmount, setTotalAmount] = useState('');
+  const [tipAmount, setTipAmount] = useState('0.00');
+  const [totalAmount, setTotalAmount] = useState('0.00');
 
   const [errors, setErrors] = useState<string[]>([]);
 
-  const pretaxInput = useRef<HTMLInputElement>(null);
-  const posttaxInput = useRef<HTMLInputElement>(null);
+  const beforeTaxInput = useRef<HTMLInputElement>(null);
+  const afterTaxInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const pretax = parseFloat(pretaxAmount) || 0;
-    const posttax = parseFloat(posttaxAmount) || 0;
+    const beforeTax = parseFloat(parseFloat(beforeTaxAmount).toFixed(2)) || 0;
+    const afterTax = parseFloat(parseFloat(afterTaxAmount).toFixed(2)) || 0;
 
-    const tip = pretax * (percentTip / 100);
-    const total = posttax + tip;
+    const hasBeforeAndAfter = beforeTax && afterTax;
 
-    const hasPretaxAndPosttax = !!pretax && !!posttax;
+    let tip = hasBeforeAndAfter ? beforeTax * (percentTip / 100) : 0;
+    let total = hasBeforeAndAfter ? afterTax + tip : 0;
 
-    setTipAmount((hasPretaxAndPosttax ? tip : 0).toFixed(2));
-    setTotalAmount((hasPretaxAndPosttax ? total : 0).toFixed(2));
-  }, [pretaxAmount, posttaxAmount, percentTip]);
+    if (shouldRoundTotal) {
+      total = Math.round(total);
+      tip = total - afterTax;
+    }
+
+    setTipAmount(tip.toFixed(2));
+    setTotalAmount(total.toFixed(2));
+  }, [beforeTaxAmount, afterTaxAmount, percentTip, shouldRoundTotal]);
 
   return (
     <div className="App">
@@ -39,57 +43,64 @@ function App() {
 
       <img id="main-image" src={moneyWoman} />
 
-      <Box pb={3}>
-        {/* <PretaxTextField
-          {...{ pretaxAmount, setPretaxAmount, errors, setErrors }}
-        />
-        <PosttaxTextField
-          {...{ posttaxAmount, setPosttaxAmount, errors, setErrors }}
-        /> */}
+      <Box pb={2}>
         <div>
           <label>
-            <strong>Pretax Amount</strong>
+            <strong>Before Tax</strong>
           </label>
           <br />
           <input
-            ref={pretaxInput}
+            ref={beforeTaxInput}
             type="number"
-            value={pretaxAmount}
+            value={beforeTaxAmount}
             onChange={(ev) => {
               let value = ev.target.value;
 
               if (value.length === 5) {
-                (posttaxInput.current as HTMLInputElement)?.focus();
+                (afterTaxInput.current as HTMLInputElement)?.focus();
               }
 
-              setPretaxAmount(value);
+              setBeforeTaxAmount(value);
             }}
           />
         </div>
 
         <div>
           <label>
-            <strong>Posttax Amount</strong>
+            <strong>After Tax</strong>
           </label>
           <br />
           <input
-            ref={posttaxInput}
+            ref={afterTaxInput}
             type="number"
-            value={posttaxAmount}
+            value={afterTaxAmount}
             onChange={(ev) => {
               let value = ev.target.value;
 
               if (value.length > 5) value = value.slice(0, 5);
 
-              setPosttaxAmount(value);
+              setAfterTaxAmount(value);
             }}
             onKeyUp={(ev) => {
               if (ev.key === 'Enter') {
-                (posttaxInput.current as HTMLInputElement).blur();
+                (afterTaxInput.current as HTMLInputElement).blur();
               }
             }}
           />
         </div>
+      </Box>
+
+      <Box mb={1} ml="auto">
+        <FormControlLabel
+          control={
+            <Switch
+              checked={shouldRoundTotal}
+              onChange={(ev) => setShouldRoundTotal(ev.target.checked)}
+            />
+          }
+          label="Round"
+          labelPlacement="start"
+        />
       </Box>
 
       <Box pb={4}>
@@ -97,8 +108,8 @@ function App() {
           {...{
             percentTip,
             setPercentTip,
-            pretaxAmount,
-            posttaxAmount
+            beforeTaxAmount,
+            afterTaxAmount
           }}
         />
       </Box>
