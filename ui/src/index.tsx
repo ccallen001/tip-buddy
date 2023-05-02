@@ -1,15 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.scss';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './app/App';
+import Capture from './pages/Capture';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import './index.scss';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <RouterProvider
+      router={createBrowserRouter([
+        {
+          path: '/',
+          element: <App />
+        },
+        {
+          path: 'capture',
+          element: <Capture />
+        }
+      ])}
+    />
   </React.StrictMode>
 );
 

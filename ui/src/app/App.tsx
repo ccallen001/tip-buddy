@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Typography, Box, Switch, FormControlLabel } from '@mui/material';
+import { CameraAlt } from '@mui/icons-material';
 import PercentSlider from '../components/PercentSlider';
 import moneyWoman from '../assets/money-woman.png';
 import './App.scss';
@@ -12,10 +14,12 @@ function App() {
   const [tipAmount, setTipAmount] = useState('0.00');
   const [totalAmount, setTotalAmount] = useState('0.00');
 
-  const [errors, setErrors] = useState<string[]>([]);
+  // const [errors, setErrors] = useState<string[]>([]);
 
   const beforeTaxInput = useRef<HTMLInputElement>(null);
   const afterTaxInput = useRef<HTMLInputElement>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const beforeTax = parseFloat(parseFloat(beforeTaxAmount).toFixed(2)) || 0;
@@ -37,11 +41,15 @@ function App() {
 
   return (
     <div className="App">
+      <Box ml="auto" onClick={() => navigate('/capture')}>
+        <CameraAlt />
+      </Box>
+
       <Typography variant="h2" pb={4} fontFamily="cursive" textAlign="center">
         <strong>Tip Buddy</strong>
       </Typography>
 
-      <img id="main-image" src={moneyWoman} />
+      <img id="main-image" src={moneyWoman} alt="Tip Buddy" />
 
       <Box pb={2}>
         <div>
