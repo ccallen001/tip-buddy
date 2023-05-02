@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { Box } from '@mui/material';
 import { CloseSharp } from '@mui/icons-material';
 import './Capture.scss';
 
@@ -8,9 +7,10 @@ function Capture() {
 
   return (
     <div className="Capture">
-      <Box ml="auto" onClick={() => navigate('/')}>
-        <CloseSharp />
-      </Box>
+      <CloseSharp
+        style={{ marginLeft: 'auto' }}
+        onClick={() => navigate('/')}
+      />
 
       <h2>Capture</h2>
     </div>
