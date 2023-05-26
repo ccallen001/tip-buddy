@@ -1,39 +1,64 @@
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ImageLike, createWorker } from 'tesseract.js';
+import { createWorker } from 'tesseract.js';
 import { CloseSharp } from '@mui/icons-material';
 import './Capture.scss';
-import { SyntheticEvent, useState } from 'react';
 
 function Capture() {
   const navigate = useNavigate();
 
-  const [progress, setProgress] = useState(0);
-  const [recognizedDigits, setRecognizedDigits] = useState<
-    RegExpMatchArray | []
-  >([]);
+  const [captured, setCaptured] = useState('');
 
-  async function handleImageChange({ target }: SyntheticEvent) {
-    const worker = await createWorker({
-      logger: (m) => {
-        console.log(m);
-        setProgress(m.progress * 100);
-      }
+  const video = useRef<HTMLVideoElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+
+  const videoCurr = video.current;
+  const canvasCurr = canvas.current;
+
+  let worker: Tesseract.Worker;
+
+  (async () => {
+    worker = await createWorker({
+      logger: (m) => console.log(m)
     });
 
-    const image = (target as HTMLInputElement).files?.[0];
-
+    await worker.load();
     await worker.loadLanguage('eng');
     await worker.initialize('eng');
-    const {
-      data: { text }
-    } = await worker.recognize(image as ImageLike);
-    setProgress(100);
 
-    const digits = text.match(/[+-]?([0-9]*[.])?[0-9]+/g);
+    if (videoCurr && canvasCurr) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true
+      });
 
-    console.log(digits);
-    setRecognizedDigits(digits || recognizedDigits);
-    await worker.terminate();
+      videoCurr.srcObject = stream;
+
+      videoCurr.onresize = () => {
+        canvasCurr.width = videoCurr.videoWidth;
+        canvasCurr.height = videoCurr.videoHeight;
+      };
+
+      console.log('about to play');
+
+      videoCurr.play();
+    }
+  })();
+
+  async function capture() {
+    if (videoCurr && canvasCurr && worker) {
+      canvasCurr
+        ?.getContext('2d')
+        // @ts-ignore
+        ?.drawImage(videoCurr, 0, 0, canvasCurr?.width, canvasCurr?.height);
+
+      const img = canvasCurr?.toDataURL('image/png');
+
+      const {
+        data: { text }
+      } = await worker.recognize(img || '');
+
+      setCaptured(text?.match(/(\d|\.)+/g)?.join(' ') || '');
+    }
   }
 
   return (
@@ -45,19 +70,12 @@ function Capture() {
 
       <h2 style={{ marginBottom: 16 }}>Capture</h2>
 
-      <input type="file" accept="image/*" onChange={handleImageChange} />
+      <video ref={video}></video>
+      <canvas ref={canvas} style={{ display: 'none' }}></canvas>
 
-      <meter
-        min="0"
-        max="100"
-        value={progress}
-        style={{ margin: '16px 0', width: '100%' }}
-      />
-
+      <button onClick={capture}>Capture</button>
       <div>
-        {recognizedDigits.map((digitGroup, i) => (
-          <pre key={i}>{digitGroup}</pre>
-        ))}
+        <b>Captured:</b> {captured}
       </div>
     </div>
   );

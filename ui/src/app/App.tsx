@@ -48,11 +48,14 @@ function App() {
   return (
     <div className="App">
       <CameraAlt
-        style={{ marginLeft: 'auto' }}
+        style={{ position: 'absolute', top: 32, right: 32, marginLeft: 'auto' }}
         onClick={() => navigate('/capture')}
       />
+
       <h1>Tip Buddy</h1>
+
       <img id="main-image" src={moneyWoman} alt="Tip Buddy" />
+
       <NumberInput
         ref={beforeTaxInput}
         label="Before Tax"
