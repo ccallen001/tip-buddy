@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createWorker } from 'tesseract.js';
 import { CloseSharp } from '@mui/icons-material';
@@ -10,12 +10,32 @@ function Capture() {
   const [captured, setCaptured] = useState('');
 
   const video = useRef<HTMLVideoElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
-
   const videoCurr = video.current;
+  const canvas = useRef<HTMLCanvasElement>(null);
   const canvasCurr = canvas.current;
 
   let worker: Tesseract.Worker;
+
+  useEffect(() => {
+    (async () => {
+      console.log(videoCurr, canvasCurr);
+
+      if (videoCurr && canvasCurr) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true
+        });
+
+        videoCurr.srcObject = stream;
+
+        videoCurr.onresize = () => {
+          canvasCurr.width = videoCurr.videoWidth;
+          canvasCurr.height = videoCurr.videoHeight;
+        };
+
+        videoCurr.play();
+      }
+    })();
+  }, [video, videoCurr, canvas, canvasCurr]);
 
   (async () => {
     worker = await createWorker({
@@ -25,30 +45,12 @@ function Capture() {
     await worker.load();
     await worker.loadLanguage('eng');
     await worker.initialize('eng');
-
-    if (videoCurr && canvasCurr) {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true
-      });
-
-      videoCurr.srcObject = stream;
-
-      videoCurr.onresize = () => {
-        canvasCurr.width = videoCurr.videoWidth;
-        canvasCurr.height = videoCurr.videoHeight;
-      };
-
-      console.log('about to play');
-
-      videoCurr.play();
-    }
   })();
 
   async function capture() {
     if (videoCurr && canvasCurr && worker) {
       canvasCurr
         ?.getContext('2d')
-        // @ts-ignore
         ?.drawImage(videoCurr, 0, 0, canvasCurr?.width, canvasCurr?.height);
 
       const img = canvasCurr?.toDataURL('image/png');
@@ -57,7 +59,9 @@ function Capture() {
         data: { text }
       } = await worker.recognize(img || '');
 
-      setCaptured(text?.match(/(\d|\.)+/g)?.join(' ') || '');
+      setCaptured(
+        text?.match(/(\d|\.)+/g)?.join(' ') || 'No digits were captured'
+      );
     }
   }
 
